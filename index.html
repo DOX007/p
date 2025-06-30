@@ -101,8 +101,16 @@
       map = new google.maps.Map(document.getElementById('map'), {
   zoom: 15,
   center: { lat: 59.3293, lng: 18.0686 },
-  disableDefaultUI: true,
-  gestureHandling: "greedy"
+  gestureHandling: "greedy",
+  fullscreenControl: true,         // Behåll helskärm!
+  mapTypeControl: true,            // Map/Satellite-knappar
+  zoomControl: false,               // Zoomknappar
+  streetViewControl: true,        // Ta bort "Pegman"
+  rotateControl: true,            // Ta bort "rotera"/kompass
+  scaleControl: true,             // Ingen skala
+  panControl: true,               // (den finns knappt längre)
+  tilt: 0,                         // Ingen tilt
+  disableDefaultUI: true
 });
 
       marker = new google.maps.Marker({
