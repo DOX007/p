@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <title>Live GPS från Firebase</title>
+  <meta charset="utf-8">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      border: none;
+      overflow: hidden;
+      width: 100%;
+    }
+    #map {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    // Din Firebase-konfiguration (hårdkodad nyckel)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM",
+      authDomain: "maps-94148.firebaseapp.com",
+      databaseURL: "https://maps-94148-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "maps-94148",
+      storageBucket: "maps-94148.appspot.com",
+      messagingSenderId: "677438488330",
+      appId: "1:677438488330:web:f0b4cbb057242c5893c4f3"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    let map, marker;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 15,
+        center: { lat: 59.3293, lng: 18.0686 }, // Start vid Stockholm
+        disableDefaultUI: false
+      });
+      marker = new google.maps.Marker({
+        position: { lat: 59.3293, lng: 18.0686 },
+        map: map,
+        title: "Device1"
+      });
+    }
+
+    window.initMap = initMap;
+
+    // Lyssna på din nod i Firebase
+    const ref = firebase.database().ref("live_locations/device1");
+    ref.on("value", (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.lat && data.lon) {
+        const pos = { lat: data.lat, lng: data.lon };
+        marker.setPosition(pos);
+        map.setCenter(pos);
+      }
+    });
+  </script>
+  <!-- Google Maps callback, med din nyckel -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM&callback=initMap"></script>
+</body>
+</html>
+
