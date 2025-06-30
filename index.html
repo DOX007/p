@@ -31,7 +31,6 @@
       font-size: 12px !important;
       border-radius: 4px !important;
     }
-    /* Anpassad darkmode-knapp-stil */
     .darkmode-btn {
       margin: 10px;
       background: #222;
@@ -68,9 +67,8 @@
 
     let map, marker, customMarker = null;
     let drivingRoute = null, walkingRoute = null;
+    let drivingClickableLine = null, walkingClickableLine = null;
     let longPressTimer = null;
-
-    // För darkmode (demo)
     let darkModeEnabled = false;
 
     function addCustomDarkModeControl(map) {
@@ -99,19 +97,19 @@
 
     function initMap() {
       map = new google.maps.Map(document.getElementById('map'), {
-  zoom: 15,
-  center: { lat: 59.3293, lng: 18.0686 },
-  gestureHandling: "greedy",
-  fullscreenControl: true,         // Behåll helskärm!
-  mapTypeControl: true,            // Map/Satellite-knappar
-  zoomControl: false,               // Zoomknappar
-  streetViewControl: true,        // Ta bort "Pegman"
-  rotateControl: true,            // Ta bort "rotera"/kompass
-  scaleControl: true,             // Ingen skala
-  panControl: true,               // (den finns knappt längre)
-  tilt: 0,                         // Ingen tilt
-  disableDefaultUI: true
-});
+        zoom: 15,
+        center: { lat: 59.3293, lng: 18.0686 },
+        gestureHandling: "greedy",
+        fullscreenControl: true,
+        mapTypeControl: true,
+        zoomControl: false,
+        streetViewControl: true,
+        rotateControl: true,
+        scaleControl: true,
+        panControl: true,
+        tilt: 0,
+        disableDefaultUI: true
+      });
 
       marker = new google.maps.Marker({
         position: { lat: 59.3293, lng: 18.0686 },
@@ -130,13 +128,11 @@
         }
       });
 
-      // Lägg till darkmode-knapp
       addCustomDarkModeControl(map);
 
       // Långtryck för att sätta markör
       map.addListener('mousedown', function(event) {
         longPressTimer = setTimeout(function() {
-          // Långklick - sätt markör
           if (customMarker) customMarker.setMap(null);
           customMarker = new google.maps.Marker({
             position: event.latLng,
@@ -144,7 +140,7 @@
             label: "!"
           });
           drawRoutes(marker.getPosition(), event.latLng);
-        }, 700); // 700 ms
+        }, 700); // 700 ms långklick
       });
 
       map.addListener('mouseup', function(event) {
@@ -161,6 +157,8 @@
 
       if (drivingRoute) drivingRoute.setMap(null);
       if (walkingRoute) walkingRoute.setMap(null);
+      if (drivingClickableLine) drivingClickableLine.setMap(null);
+      if (walkingClickableLine) walkingClickableLine.setMap(null);
 
       // Driving
       directionsService.route({
@@ -171,10 +169,9 @@
         if (status === 'OK') {
           drivingRoute = new google.maps.DirectionsRenderer({
             map: map,
-            directions: result,
             suppressMarkers: true,
             polylineOptions: {
-              strokeColor: "#000",
+              strokeColor: "#2196f3",
               strokeWeight: 8,
               strokeOpacity: 0.9,
               icons: [{
@@ -185,8 +182,6 @@
             }
           });
           drivingRoute.setDirections(result);
-
-          // "Fake" click-lyssnare för bilrutt (lägg en genomskinlig polyline ovanpå)
           addClickablePolyline(result.routes[0].overview_path, "#000", "driving");
         }
       });
@@ -200,24 +195,20 @@
         if (status === 'OK') {
           walkingRoute = new google.maps.DirectionsRenderer({
             map: map,
-            directions: result,
             suppressMarkers: true,
             polylineOptions: {
-              strokeColor: "#0f0",
+              strokeColor: "#539636",
               strokeWeight: 8,
               strokeOpacity: 0.8
             }
           });
           walkingRoute.setDirections(result);
-
-          // "Fake" click-lyssnare för gångrutt (lägg en genomskinlig polyline ovanpå)
           addClickablePolyline(result.routes[0].overview_path, "#0f0", "walking");
         }
       });
     }
 
     // Lägg osynlig linje för att lyssna på klick
-    let drivingClickableLine = null, walkingClickableLine = null;
     function addClickablePolyline(path, color, mode) {
       // Ta bort gamla
       if (mode === "driving" && drivingClickableLine) drivingClickableLine.setMap(null);
@@ -254,10 +245,8 @@
       window.open(`https://www.google.com/maps/dir/?api=1&origin=${start.lat()},${start.lng()}&destination=${end.lat()},${end.lng()}&travelmode=${mode.toLowerCase()}`, '_blank');
     }
 
-    // Google Maps callback
     window.initMap = initMap;
   </script>
-  <!-- Google Maps callback -->
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM&callback=initMap"></script>
 </body>
 </html>
