@@ -19,17 +19,33 @@
       -webkit-user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    .gm-style-mtc {
-      font-size: 12px !important;
-      height: 30px !important;
-      min-width: 0 !important;
+    #custom-controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 99;
+      display: flex;
+      gap: 8px;
     }
-    .gm-style-mtc button {
-      padding: 2px 8px !important;
-      height: 26px !important;
-      min-width: 40px !important;
-      font-size: 12px !important;
-      border-radius: 4px !important;
+    #custom-controls button {
+      padding: 9px 22px;
+      border-radius: 7px;
+      border: none;
+      background: rgba(40,40,40,0.5);
+      color: #fff;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(20,20,20,0.08);
+      outline: none;
+      transition: background 0.15s, color 0.15s, box-shadow 0.2s;
+      backdrop-filter: blur(1px);
+      letter-spacing: 0.5px;
+    }
+    #custom-controls button:hover {
+      background: rgba(70,70,80,0.7);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.18);
     }
     .darkmode-btn {
       margin: 10px;
@@ -51,6 +67,11 @@
   </style>
 </head>
 <body>
+  <div id="custom-controls">
+    <button onclick="setMapType('roadmap')">Map</button>
+    <button onclick="setMapType('satellite')">Sateli</button>
+    <button onclick="clearRoutesAndMarkers()">New map</button>
+  </div>
   <div id="map"></div>
   <script>
     // Firebase-konfig
@@ -83,7 +104,6 @@
       map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlDiv);
     }
 
-    // Enkel darkmode-stil
     const darkMapStyle = [
       {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
       {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
@@ -101,7 +121,7 @@
         center: { lat: 59.3293, lng: 18.0686 },
         gestureHandling: "greedy",
         fullscreenControl: true,
-        mapTypeControl: true,
+        mapTypeControl: false,
         zoomControl: false,
         streetViewControl: true,
         rotateControl: true,
@@ -151,7 +171,36 @@
       });
     }
 
-    // Rita bil- och gångrutt
+    function setMapType(type) {
+      if (map) {
+        map.setMapTypeId(type);
+      }
+    }
+
+    function clearRoutesAndMarkers() {
+      if (drivingRoute) {
+        drivingRoute.setMap(null);
+        drivingRoute = null;
+      }
+      if (walkingRoute) {
+        walkingRoute.setMap(null);
+        walkingRoute = null;
+      }
+      if (drivingClickableLine) {
+        drivingClickableLine.setMap(null);
+        drivingClickableLine = null;
+      }
+      if (walkingClickableLine) {
+        walkingClickableLine.setMap(null);
+        walkingClickableLine = null;
+      }
+      if (customMarker) {
+        customMarker.setMap(null);
+        customMarker = null;
+      }
+      // Kartan påverkas inte!
+    }
+
     function drawRoutes(start, end) {
       const directionsService = new google.maps.DirectionsService();
 
@@ -172,8 +221,8 @@
             suppressMarkers: true,
             polylineOptions: {
               strokeColor: "#2196f3",
-              strokeWeight: 8,
-              strokeOpacity: 0.9,
+              strokeWeight: 6,
+              strokeOpacity: 0.5,
               icons: [{
                 icon: { path: 'M 0,-2 0,2', strokeOpacity: 1, scale: 4 },
                 offset: '0',
@@ -198,8 +247,8 @@
             suppressMarkers: true,
             polylineOptions: {
               strokeColor: "#539636",
-              strokeWeight: 8,
-              strokeOpacity: 0.8
+              strokeWeight: 6,
+              strokeOpacity: 0.5
             }
           });
           walkingRoute.setDirections(result);
@@ -208,17 +257,15 @@
       });
     }
 
-    // Lägg osynlig linje för att lyssna på klick
     function addClickablePolyline(path, color, mode) {
-      // Ta bort gamla
       if (mode === "driving" && drivingClickableLine) drivingClickableLine.setMap(null);
       if (mode === "walking" && walkingClickableLine) walkingClickableLine.setMap(null);
 
       const polyline = new google.maps.Polyline({
         path: path,
         strokeColor: color,
-        strokeOpacity: 0.01, // Nästan osynlig
-        strokeWeight: 18,     // Stor klick-yta
+        strokeOpacity: 0.01,
+        strokeWeight: 18,
         map: map
       });
 
@@ -238,7 +285,6 @@
       if (mode === "walking") walkingClickableLine = polyline;
     }
 
-    // Starta navigering (öppnar Google Maps)
     function startNavigation(path, mode) {
       const start = path[0];
       const end = path[path.length-1];
