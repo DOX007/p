@@ -41,27 +41,42 @@
       transition: background 0.15s, color 0.15s, box-shadow 0.2s;
       backdrop-filter: blur(1px);
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
     #custom-controls button:hover {
       background: rgba(70,70,80,0.7);
       color: #fff;
       box-shadow: 0 4px 18px rgba(0,0,0,0.18);
     }
+    /* Rund darkmode-knapp nere till höger */
     .darkmode-btn {
-      margin: 10px;
-      background: #222;
+      position: absolute;
+      right: 24px;
+      bottom: 32px;
+      z-index: 110;
+      width: 54px;
+      height: 54px;
+      background: rgba(0,0,0,0.5); /* 50% genomskinlig svart */
       border-radius: 50%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      width: 44px;
-      height: 44px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.23);
+      border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: background 0.15s, box-shadow 0.2s;
+      outline: none;
+    }
+    .darkmode-btn:hover {
+      background: rgba(40,40,40,0.7);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.26);
     }
     .darkmode-btn svg {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
+      fill: #fff;
       display: block;
     }
   </style>
@@ -72,6 +87,9 @@
     <button onclick="setMapType('satellite')">Sateli</button>
     <button onclick="clearRoutesAndMarkers()">New map</button>
   </div>
+  <button class="darkmode-btn" id="darkmode-btn" title="Växla mörkt läge" onclick="toggleDarkMode()">
+    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 0112.21 3a7 7 0 106.79 9.79z"/></svg>
+  </button>
   <div id="map"></div>
   <script>
     // Firebase-konfig
@@ -91,18 +109,6 @@
     let drivingClickableLine = null, walkingClickableLine = null;
     let longPressTimer = null;
     let darkModeEnabled = false;
-
-    function addCustomDarkModeControl(map) {
-      const controlDiv = document.createElement('div');
-      controlDiv.className = "darkmode-btn";
-      controlDiv.title = 'Växla mörkt läge';
-      controlDiv.innerHTML = `<svg viewBox="0 0 24 24" fill="#fff"><path d="M21 12.79A9 9 0 0112.21 3a7 7 0 106.79 9.79z"></path></svg>`;
-      controlDiv.onclick = () => {
-        darkModeEnabled = !darkModeEnabled;
-        map.setOptions({styles: darkModeEnabled ? darkMapStyle : null});
-      };
-      map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlDiv);
-    }
 
     const darkMapStyle = [
       {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
@@ -147,8 +153,6 @@
           map.setCenter(pos);
         }
       });
-
-      addCustomDarkModeControl(map);
 
       // Långtryck för att sätta markör
       map.addListener('mousedown', function(event) {
@@ -199,6 +203,11 @@
         customMarker = null;
       }
       // Kartan påverkas inte!
+    }
+
+    function toggleDarkMode() {
+      darkModeEnabled = !darkModeEnabled;
+      map.setOptions({styles: darkModeEnabled ? darkMapStyle : null});
     }
 
     function drawRoutes(start, end) {
