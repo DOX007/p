@@ -3,13 +3,12 @@
 <head>
   <title>Live GPS från Firebase</title>
   <meta charset="utf-8">
-  <!-- Viktig för mobilvy! -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM"></script>
   <style>
-    html, body {
+    html, body, #map {
       height: 100%;
       width: 100%;
       margin: 0;
@@ -20,17 +19,6 @@
       -webkit-user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    #map {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      height: 100%;
-      width: 100%;
-      margin: 0;
-      padding: 0;
-      border: none;
-      touch-action: manipulation;
-    }
-    /* --- Gör Map/Satellite-knapparna mindre --- */
     .gm-style-mtc {
       font-size: 12px !important;
       height: 30px !important;
@@ -43,12 +31,30 @@
       font-size: 12px !important;
       border-radius: 4px !important;
     }
+    /* Anpassad darkmode-knapp-stil */
+    .darkmode-btn {
+      margin: 10px;
+      background: #222;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .darkmode-btn svg {
+      width: 28px;
+      height: 28px;
+      display: block;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <script>
-    // Din Firebase-konfiguration (hårdkodad nyckel)
+    // Firebase-konfig
     const firebaseConfig = {
       apiKey: "AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM",
       authDomain: "maps-94148.firebaseapp.com",
@@ -60,36 +66,190 @@
     };
     firebase.initializeApp(firebaseConfig);
 
-    let map, marker;
+    let map, marker, customMarker = null;
+    let drivingRoute = null, walkingRoute = null;
+    let longPressTimer = null;
+
+    // För darkmode (demo)
+    let darkModeEnabled = false;
+
+    function addCustomDarkModeControl(map) {
+      const controlDiv = document.createElement('div');
+      controlDiv.className = "darkmode-btn";
+      controlDiv.title = 'Växla mörkt läge';
+      controlDiv.innerHTML = `<svg viewBox="0 0 24 24" fill="#fff"><path d="M21 12.79A9 9 0 0112.21 3a7 7 0 106.79 9.79z"></path></svg>`;
+      controlDiv.onclick = () => {
+        darkModeEnabled = !darkModeEnabled;
+        map.setOptions({styles: darkModeEnabled ? darkMapStyle : null});
+      };
+      map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlDiv);
+    }
+
+    // Enkel darkmode-stil
+    const darkMapStyle = [
+      {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
+      {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
+      {elementType: 'labels.text.fill', stylers: [{color: '#746855'}]},
+      {
+        featureType: 'road',
+        elementType: 'geometry',
+        stylers: [{color: '#38414e'}]
+      }
+    ];
 
     function initMap() {
       map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 15,
-        center: { lat: 59.3293, lng: 18.0686 }, // Start vid Stockholm
-        disableDefaultUI: false,
-        gestureHandling: "greedy" // För bättre mobil-zoom och drag
-      });
+  zoom: 15,
+  center: { lat: 59.3293, lng: 18.0686 },
+  disableDefaultUI: true,
+  gestureHandling: "greedy"
+});
+
       marker = new google.maps.Marker({
         position: { lat: 59.3293, lng: 18.0686 },
         map: map,
         title: "Device1"
       });
+
+      // Firebase-lyssnare
+      const ref = firebase.database().ref("live_locations/device1");
+      ref.on("value", (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.lat && data.lon) {
+          const pos = { lat: data.lat, lng: data.lon };
+          marker.setPosition(pos);
+          map.setCenter(pos);
+        }
+      });
+
+      // Lägg till darkmode-knapp
+      addCustomDarkModeControl(map);
+
+      // Långtryck för att sätta markör
+      map.addListener('mousedown', function(event) {
+        longPressTimer = setTimeout(function() {
+          // Långklick - sätt markör
+          if (customMarker) customMarker.setMap(null);
+          customMarker = new google.maps.Marker({
+            position: event.latLng,
+            map: map,
+            label: "!"
+          });
+          drawRoutes(marker.getPosition(), event.latLng);
+        }, 700); // 700 ms
+      });
+
+      map.addListener('mouseup', function(event) {
+        clearTimeout(longPressTimer);
+      });
+      map.addListener('drag', function(event) {
+        clearTimeout(longPressTimer);
+      });
     }
 
-    window.initMap = initMap;
+    // Rita bil- och gångrutt
+    function drawRoutes(start, end) {
+      const directionsService = new google.maps.DirectionsService();
 
-    // Lyssna på din nod i Firebase
-    const ref = firebase.database().ref("live_locations/device1");
-    ref.on("value", (snapshot) => {
-      const data = snapshot.val();
-      if (data && data.lat && data.lon) {
-        const pos = { lat: data.lat, lng: data.lon };
-        marker.setPosition(pos);
-        map.setCenter(pos);
-      }
-    });
+      if (drivingRoute) drivingRoute.setMap(null);
+      if (walkingRoute) walkingRoute.setMap(null);
+
+      // Driving
+      directionsService.route({
+        origin: start,
+        destination: end,
+        travelMode: 'DRIVING'
+      }, function(result, status) {
+        if (status === 'OK') {
+          drivingRoute = new google.maps.DirectionsRenderer({
+            map: map,
+            directions: result,
+            suppressMarkers: true,
+            polylineOptions: {
+              strokeColor: "#000",
+              strokeWeight: 8,
+              strokeOpacity: 0.9,
+              icons: [{
+                icon: { path: 'M 0,-2 0,2', strokeOpacity: 1, scale: 4 },
+                offset: '0',
+                repeat: '30px'
+              }]
+            }
+          });
+          drivingRoute.setDirections(result);
+
+          // "Fake" click-lyssnare för bilrutt (lägg en genomskinlig polyline ovanpå)
+          addClickablePolyline(result.routes[0].overview_path, "#000", "driving");
+        }
+      });
+
+      // Walking
+      directionsService.route({
+        origin: start,
+        destination: end,
+        travelMode: 'WALKING'
+      }, function(result, status) {
+        if (status === 'OK') {
+          walkingRoute = new google.maps.DirectionsRenderer({
+            map: map,
+            directions: result,
+            suppressMarkers: true,
+            polylineOptions: {
+              strokeColor: "#0f0",
+              strokeWeight: 8,
+              strokeOpacity: 0.8
+            }
+          });
+          walkingRoute.setDirections(result);
+
+          // "Fake" click-lyssnare för gångrutt (lägg en genomskinlig polyline ovanpå)
+          addClickablePolyline(result.routes[0].overview_path, "#0f0", "walking");
+        }
+      });
+    }
+
+    // Lägg osynlig linje för att lyssna på klick
+    let drivingClickableLine = null, walkingClickableLine = null;
+    function addClickablePolyline(path, color, mode) {
+      // Ta bort gamla
+      if (mode === "driving" && drivingClickableLine) drivingClickableLine.setMap(null);
+      if (mode === "walking" && walkingClickableLine) walkingClickableLine.setMap(null);
+
+      const polyline = new google.maps.Polyline({
+        path: path,
+        strokeColor: color,
+        strokeOpacity: 0.01, // Nästan osynlig
+        strokeWeight: 18,     // Stor klick-yta
+        map: map
+      });
+
+      polyline.addListener('click', function() {
+        if (mode === "driving") {
+          if (walkingRoute) walkingRoute.setMap(null);
+          if (walkingClickableLine) walkingClickableLine.setMap(null);
+          startNavigation(path, "DRIVING");
+        } else if (mode === "walking") {
+          if (drivingRoute) drivingRoute.setMap(null);
+          if (drivingClickableLine) drivingClickableLine.setMap(null);
+          startNavigation(path, "WALKING");
+        }
+      });
+
+      if (mode === "driving") drivingClickableLine = polyline;
+      if (mode === "walking") walkingClickableLine = polyline;
+    }
+
+    // Starta navigering (öppnar Google Maps)
+    function startNavigation(path, mode) {
+      const start = path[0];
+      const end = path[path.length-1];
+      window.open(`https://www.google.com/maps/dir/?api=1&origin=${start.lat()},${start.lng()}&destination=${end.lat()},${end.lng()}&travelmode=${mode.toLowerCase()}`, '_blank');
+    }
+
+    // Google Maps callback
+    window.initMap = initMap;
   </script>
-  <!-- Google Maps callback, med din nyckel -->
+  <!-- Google Maps callback -->
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM&callback=initMap"></script>
 </body>
 </html>
