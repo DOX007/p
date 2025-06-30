@@ -3,17 +3,22 @@
 <head>
   <title>Live GPS från Firebase</title>
   <meta charset="utf-8">
+  <!-- Viktig för mobilvy! -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM"></script>
   <style>
     html, body {
       height: 100%;
+      width: 100%;
       margin: 0;
       padding: 0;
       border: none;
       overflow: hidden;
-      width: 100%;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     #map {
       position: absolute;
@@ -23,6 +28,7 @@
       margin: 0;
       padding: 0;
       border: none;
+      touch-action: manipulation;
     }
   </style>
 </head>
@@ -47,7 +53,8 @@
       map = new google.maps.Map(document.getElementById('map'), {
         zoom: 15,
         center: { lat: 59.3293, lng: 18.0686 }, // Start vid Stockholm
-        disableDefaultUI: false
+        disableDefaultUI: false,
+        gestureHandling: "greedy" // För bättre mobil-zoom och drag
       });
       marker = new google.maps.Marker({
         position: { lat: 59.3293, lng: 18.0686 },
@@ -73,4 +80,3 @@
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM&callback=initMap"></script>
 </body>
 </html>
-
