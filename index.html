@@ -46,8 +46,8 @@
       backdrop-filter: blur(1px);
       letter-spacing: 0.5px;
     }
-    #custom-controls button:hover {
-      background: rgba(70,70,80,0.7);
+    #custom-controls button:hover, #followmeBtn.active {
+      background: #45b468 !important;
       color: #fff;
       box-shadow: 0 4px 18px rgba(0,0,0,0.18);
     }
@@ -77,6 +77,7 @@
     <button onclick="setMapType('roadmap')">Map</button>
     <button onclick="setMapType('satellite')">Sateli</button>
     <button onclick="clearRoutesAndMarkers()">New map</button>
+    <button id="followmeBtn" onclick="enableAutoFollow()" class="active">Följ mig</button>
   </div>
   <div id="map"></div>
   <script>
@@ -97,6 +98,8 @@
     let drivingClickableLine = null, walkingClickableLine = null;
     let longPressTimer = null;
     let darkModeEnabled = false;
+    let autoFollow = true;
+    let lastBearing = null;
 
     function addCustomDarkModeControl(map) {
       const controlDiv = document.createElement('div');
@@ -137,6 +140,17 @@
       );
       const newLatLng = proj.fromPointToLatLng(newPoint);
       map.panTo(newLatLng);
+    }
+
+    function enableAutoFollow() {
+      autoFollow = true;
+      document.getElementById("followmeBtn").classList.add("active");
+      if (marker && marker.getPosition()) {
+        panToWithOffset(map, marker.getPosition(), 0, +200);
+        if (lastBearing !== null) {
+          map.setHeading(lastBearing);
+        }
+      }
     }
 
     function initMap() {
@@ -200,11 +214,15 @@
         if (data && data.lat && data.lon) {
           const pos = { lat: data.lat, lng: data.lon };
           marker.setPosition(pos);
-          panToWithOffset(map, pos, 0, +200); // 0 = center i X, +200px i Y (längre ner i skärmen)
 
-          // --- Automatisk rotation: Prioritera GPS bearing om finns ---
-          if (typeof data.bearing === "number") {
-            map.setHeading(data.bearing);
+          // AUTO FOLLOW bara om aktivt!
+          if (autoFollow) {
+            panToWithOffset(map, pos, 0, +200);
+            if (typeof data.bearing === "number") {
+              lastBearing = data.bearing;
+              map.setHeading(data.bearing);
+            }
+            document.getElementById("followmeBtn").classList.add("active");
           }
         }
       });
@@ -264,6 +282,16 @@
       });
       map.addListener('drag', function(event) {
         clearTimeout(longPressTimer);
+      });
+
+      // Om du drar eller zoomar, inaktivera auto-follow
+      map.addListener('dragstart', function() {
+        autoFollow = false;
+        document.getElementById("followmeBtn").classList.remove("active");
+      });
+      map.addListener('zoom_changed', function() {
+        autoFollow = false;
+        document.getElementById("followmeBtn").classList.remove("active");
       });
     }
 
@@ -390,7 +418,7 @@
     // --- NYTT: Använd device orientation om bearing saknas ---
     if (window.DeviceOrientationEvent) {
       window.addEventListener("deviceorientationabsolute", function(event) {
-        if (map && typeof event.alpha === "number") {
+        if (map && typeof event.alpha === "number" && autoFollow) {
           map.setHeading(event.alpha);
         }
       }, true);
