@@ -254,7 +254,11 @@ function initMap() {
     });
     });
 
-    // Multi-device-läge: visa ALLA pins, auto-rensning, popup namn på klick!
+    // RADERA/kommentera bort denna gamla marker: (den behövs inte för multi-device)
+// marker = new google.maps.Marker({ ... });
+
+// NYA multi-device funktionen (klistra in där gamla ref.on låg):
+
     const ref = firebase.database().ref("live_locations");
     const markers = {};
     const TIMEOUT = 30000; // 30 sekunder
@@ -263,7 +267,7 @@ function initMap() {
         const data = snapshot.val();
         const now = Date.now();
 
-        // Ta bort gamla/inaktiva pins
+        // Ta bort gamla pins
         for (const name in markers) {
             if (
                 !data ||
@@ -276,7 +280,7 @@ function initMap() {
             }
         }
 
-        // Lägg till/uppdatera aktiva enheter
+        // Lägg till eller uppdatera aktiva
         for (const name in data) {
             if (
                 data[name] &&
@@ -287,13 +291,19 @@ function initMap() {
             ) {
                 const pos = { lat: data[name].lat, lng: data[name].lon };
                 if (!markers[name]) {
+                    // VILL DU SE NAMNET ALLTID? (label):
                     markers[name] = new google.maps.Marker({
                         position: pos,
                         map: map,
-                        label: "", // Visa namnet endast vid klick!
+                        label: {
+                        text: name,
+                        fontWeight: "bold",
+                        fontSize: "15px",
+                        color: "#144"
+                    },
                         title: name
                     });
-                    // Minimal popup, inget X, ingen bakgrund
+                    // Popup med namn vid klick (valfritt)
                     const infoWindow = new google.maps.InfoWindow({
                             content: `<div style="font-weight:bold;font-size:15px;color:#144;background:none;border:none;box-shadow:none;">${name}</div>`,
                             disableAutoPan: true
