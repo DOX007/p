@@ -455,4 +455,19 @@
     function startNavigation(path, mode) {
       const start = path[0];
       const end = path[path.length-1];
-      window
+      window.open(`https://www.google.com/maps/dir/?api=1&origin=${start.lat()},${start.lng()}&destination=${end.lat()},${end.lng()}&travelmode=${mode.toLowerCase()}`, '_blank');
+    }
+
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener("deviceorientationabsolute", function(event) {
+        if (map && typeof event.alpha === "number" && autoFollow) {
+          map.setHeading(event.alpha);
+        }
+      }, true);
+    }
+
+    window.initMap = initMap;
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBsiwvyTgZ6DULis2sPhxFGiSY-alC0FM&callback=initMap"></script>
+</body>
+</html>
