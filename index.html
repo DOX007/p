@@ -254,22 +254,45 @@
     });
   });
 
-  const ref = firebase.database().ref("live_locations/device1");
-  ref.on("value", (snapshot) => {
-    const data = snapshot.val();
-    if (data && data.lat && data.lon) {
-      const pos = { lat: data.lat, lng: data.lon };
-      marker.setPosition(pos);
-      if (autoFollow) {
-        panToWithOffset(map, pos, 0, +200);
-        if (typeof data.bearing === "number") {
-          lastBearing = data.bearing;
-          map.setHeading(data.bearing);
+  const ref = firebase.database().ref("live_locations");
+const markers = {};
+
+ref.on("value", (snapshot) => {
+  const data = snapshot.val();
+  // Ta bort gamla markers om de inte längre finns i Firebase
+  for (const name in markers) {
+    if (!data || !(name in data)) {
+      markers[name].setMap(null);
+      delete markers[name];
+    }
+  }
+  // Lägg till/uppdatera markers för alla aktiva enheter
+  for (const name in data) {
+    if (data[name] && data[name].lat && data[name].lon) {
+      const pos = { lat: data[name].lat, lng: data[name].lon };
+      if (!markers[name]) {
+        markers[name] = new google.maps.Marker({
+          position: pos,
+          map: map,
+          label: "",
+          title: name
+        });
+        // Lägg till namn ovanför markören
+        const infoWindow = new google.maps.InfoWindow({
+          content: `<div style="font-weight:bold;font-size:15px;color:#144;">${name}</div>`,
+          pixelOffset: new google.maps.Size(0, -35)
+        });
+        infoWindow.open(map, markers[name]);
+        markers[name].infoWindow = infoWindow;
+      } else {
+        markers[name].setPosition(pos);
+        if (markers[name].infoWindow) {
+          markers[name].infoWindow.setPosition(pos);
         }
-        if (followmeDiv) followmeDiv.classList.add("active");
       }
     }
-  });
+  }
+});
 
   addCustomDarkModeControl(map);
   addFollowMeControl(map);
