@@ -254,75 +254,22 @@ function initMap() {
     });
     });
 
-    // RADERA/kommentera bort denna gamla marker: (den behövs inte för multi-device)
-// marker = new google.maps.Marker({ ... });
-
-// NYA multi-device funktionen (klistra in där gamla ref.on låg):
-
-    const ref = firebase.database().ref("live_locations");
-    const markers = {};
-    const TIMEOUT = 30000; // 30 sekunder
-
+    const ref = firebase.database().ref("live_locations/device1");
     ref.on("value", (snapshot) => {
         const data = snapshot.val();
-        const now = Date.now();
-
-        // Ta bort gamla pins
-        for (const name in markers) {
-            if (
-                !data ||
-                !(name in data) ||
-                !data[name].timestamp ||
-                now - data[name].timestamp > TIMEOUT
-            ) {
-                markers[name].setMap(null);
-                delete markers[name];
-            }
-        }
-
-        // Lägg till eller uppdatera aktiva
-        for (const name in data) {
-            if (
-                data[name] &&
-                data[name].lat &&
-                data[name].lon &&
-                data[name].timestamp &&
-                now - data[name].timestamp <= TIMEOUT
-            ) {
-                const pos = { lat: data[name].lat, lng: data[name].lon };
-                if (!markers[name]) {
-                    // VILL DU SE NAMNET ALLTID? (label):
-                    markers[name] = new google.maps.Marker({
-                        position: pos,
-                        map: map,
-                        label: {
-                        text: name,
-                        fontWeight: "bold",
-                        fontSize: "15px",
-                        color: "#144"
-                    },
-                        title: name
-                    });
-                    // Popup med namn vid klick (valfritt)
-                    const infoWindow = new google.maps.InfoWindow({
-                            content: `<div style="font-weight:bold;font-size:15px;color:#144;background:none;border:none;box-shadow:none;">${name}</div>`,
-                            disableAutoPan: true
-                    });
-                    markers[name].infoWindow = infoWindow;
-                    markers[name].addListener('click', function() {
-                        if (infoWindow.getMap()) {
-                            infoWindow.close();
-                        } else {
-                            infoWindow.open(map, markers[name]);
-                        }
-                    });
-                } else {
-                    markers[name].setPosition(pos);
+        if (data && data.lat && data.lon) {
+            const pos = { lat: data.lat, lng: data.lon };
+            marker.setPosition(pos);
+            if (autoFollow) {
+                panToWithOffset(map, pos, 0, +200);
+                if (typeof data.bearing === "number") {
+                    lastBearing = data.bearing;
+                    map.setHeading(data.bearing);
                 }
+                if (followmeDiv) followmeDiv.classList.add("active");
             }
         }
     });
-
 
     addCustomDarkModeControl(map);
     addFollowMeControl(map);
