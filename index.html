@@ -256,39 +256,65 @@
 
   const ref = firebase.database().ref("live_locations");
 const markers = {};
+const TIMEOUT = 30000; // 30 sekunder, byt vid behov
 
 ref.on("value", (snapshot) => {
   const data = snapshot.val();
-  // Ta bort gamla markers om de inte längre finns i Firebase
+  const now = Date.now();
+
+  // Rensa bort markers som inte längre finns i data eller är för gamla
   for (const name in markers) {
-    if (!data || !(name in data)) {
+    if (
+      !data ||
+      !(name in data) ||
+      !data[name].timestamp ||
+      now - data[name].timestamp > TIMEOUT
+    ) {
       markers[name].setMap(null);
       delete markers[name];
     }
   }
-  // Lägg till/uppdatera markers för alla aktiva enheter
+
+  // Lägg till eller uppdatera markers för varje device
   for (const name in data) {
-    if (data[name] && data[name].lat && data[name].lon) {
-      const pos = { lat: data[name].lat, lng: data[name].lon };
-      if (!markers[name]) {
-        markers[name] = new google.maps.Marker({
-          position: pos,
-          map: map,
-          label: "",
-          title: name
-        });
-        // Lägg till namn ovanför markören
-        const infoWindow = new google.maps.InfoWindow({
-          content: `<div style="font-weight:bold;font-size:15px;color:#144;">${name}</div>`,
-          pixelOffset: new google.maps.Size(0, -35)
-        });
-        infoWindow.open(map, markers[name]);
-        markers[name].infoWindow = infoWindow;
-      } else {
-        markers[name].setPosition(pos);
-        if (markers[name].infoWindow) {
-          markers[name].infoWindow.setPosition(pos);
+  if (
+    data[name] &&
+    data[name].lat &&
+    data[name].lon &&
+    data[name].timestamp &&
+    now - data[name].timestamp <= TIMEOUT
+  ) {
+    const pos = { lat: data[name].lat, lng: data[name].lon };
+    if (!markers[name]) {
+      markers[name] = new google.maps.Marker({
+        position: pos,
+        map: map,
+        label: {
+          text: name,  // Om du ALLTID vill visa namnet bredvid pinnen
+          fontWeight: "bold",
+          fontSize: "15px",
+          color: "#144"
+        },
+        title: name
+      });
+      // Lägg till ett InfoWindow men öppna det INTE automatiskt!
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<div style="font-weight:bold;font-size:15px;color:#144;background:none;border:none;box-shadow:none;">${name}</div>`,
+        disableAutoPan: true
+      });
+      markers[name].infoWindow = infoWindow;
+
+      // Visa/dölj InfoWindow vid klick på pin
+      markers[name].addListener('click', function() {
+        // Stäng om öppen, annars öppna
+        if (infoWindow.getMap()) {
+          infoWindow.close();
+        } else {
+          infoWindow.open(map, markers[name]);
         }
+      });
+    } else {
+      markers[name].setPosition(pos);
       }
     }
   }
