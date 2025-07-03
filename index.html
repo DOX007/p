@@ -276,21 +276,21 @@
 
   // Alltid synlig namnruta ovanför markören – med batteri!
   const infoWindow = new google.maps.InfoWindow({
-    content: `<div style="
-      background:#222222;
-      border-radius:1px;
-      padding:1px 16px;
-      font-weight:bold;
-      font-size:15px;
-      color:#fff;
-      border:1.2px solid #444;
-      box-shadow:0 2px 8px rgba(20,20,20,0.11);
-      text-align:center;">
-      ${name}
-      ${battery}
-    </div>`,
-    pixelOffset: new google.maps.Size(0, -5)
-  });
+  content: `<div style="
+    background:#222222;
+    border-radius:1px;
+    padding:1px 16px;
+    font-weight:bold;
+    font-size:15px;
+    color:#fff;
+    border:1.2px solid #444;
+    box-shadow:0 2px 8px rgba(20,20,20,0.11);
+    text-align:center;">
+    ${name}
+    ${battery}
+  </div>`,
+  pixelOffset: new google.maps.Size(0, -5)
+});
 
   infoWindow.open(map, markers[name]);
   markers[name].infoWindow = infoWindow;
