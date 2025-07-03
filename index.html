@@ -131,6 +131,8 @@
     let autoFollow = true;
     let lastBearing = null;
     let followmeDiv = null;
+    let marker = null; // används som "start" vid rutt
+    let markers = {};  // alla aktiva pins
 
     function addCustomDarkModeControl(map) {
       const controlDiv = document.createElement('div');
@@ -196,8 +198,6 @@
       map.panTo(newLatLng);
     }
 
-    let markers = {}; // GLOBAL för followme
-
     function initMap() {
       map = new google.maps.Map(document.getElementById('map'), {
         zoom: 15,
@@ -214,7 +214,7 @@
         disableDefaultUI: true
       });
 
-      // === ALLA ENHETER: Live positions ===
+      // === Multi-device: Live positions ===
       const ref = firebase.database().ref("live_locations");
       const TIMEOUT = 30000; // 30 sekunder
 
@@ -232,10 +232,11 @@
           ) {
             markers[name].setMap(null);
             delete markers[name];
+            if (marker && marker.title === name) marker = null;
           }
         }
 
-        // Lägg till/uppdatera aktiva markörer
+        // Lägg till/uppdatera markörer för varje aktiv enhet
         let anyActive = false;
         for (const name in data) {
           if (
@@ -266,6 +267,7 @@
               });
               markers[name].infoWindow = infoWindow;
               markers[name].addListener('click', function() {
+                marker = markers[name]; // Sätt denna som "aktiv start" för rutt
                 if (infoWindow.getMap()) {
                   infoWindow.close();
                 } else {
@@ -282,7 +284,6 @@
             }
           }
         }
-        // Om ingen aktiv, ingen pan
         if (!anyActive && followmeDiv) followmeDiv.classList.remove("active");
       });
 
@@ -335,7 +336,19 @@
             });
           });
 
-          drawRoutes(event.latLng, event.latLng);
+          // Använd "marker" (senast valda pin) eller första aktiva marker
+          let startMarker = marker;
+          if (!startMarker) {
+            for (const key in markers) {
+              startMarker = markers[key];
+              break;
+            }
+          }
+          if (startMarker) {
+            drawRoutes(startMarker.getPosition(), event.latLng);
+          } else {
+            alert("Välj en startpunkt genom att klicka på din pin först!");
+          }
         }, 700);
       });
 
