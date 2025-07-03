@@ -248,13 +248,7 @@
           ) {
             anyActive = true;
             const pos = { lat: data[name].lat, lng: data[name].lon };
-if (!markers[name]) {
-  markers[name] = new google.maps.Marker({
-    position: pos,
-    map: map,
-    title: name
-  });
-  // Alltid synlig namnruta ovanför markören!
+
   if (!markers[name]) {
   markers[name] = new google.maps.Marker({
     position: pos,
