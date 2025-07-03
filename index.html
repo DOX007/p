@@ -288,7 +288,7 @@ if (!markers[name]) {
   infoWindow.open(map, markers[name]);
   markers[name].infoWindow = infoWindow;
   markers[name].addListener('click', function() {
-    marker = markers[name]; // Markera start för rutt
+    marker = markers[name];
     if (infoWindow.getMap()) {
       infoWindow.close();
     } else {
@@ -298,7 +298,6 @@ if (!markers[name]) {
 } else {
   markers[name].setPosition(pos);
 }
-// Autofollow
 if (autoFollow) {
   map.panTo(pos);
   if (followmeDiv) followmeDiv.classList.add("active");
