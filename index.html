@@ -248,40 +248,47 @@
           ) {
             anyActive = true;
             const pos = { lat: data[name].lat, lng: data[name].lon };
-            if (!markers[name]) {
-              markers[name] = new google.maps.Marker({
-                position: pos,
-                map: map,
-                label: {
-                  text: name,
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  color: "#144"
-                },
-                title: name
-              });
-              // Minimal popup vid klick, inget X
-              const infoWindow = new google.maps.InfoWindow({
-                content: `<div style="font-weight:bold;font-size:15px;color:#144;background:none;border:none;box-shadow:none;">${name}</div>`,
-                disableAutoPan: true
-              });
-              markers[name].infoWindow = infoWindow;
-              markers[name].addListener('click', function() {
-                marker = markers[name]; // Sätt denna som "aktiv start" för rutt
-                if (infoWindow.getMap()) {
-                  infoWindow.close();
-                } else {
-                  infoWindow.open(map, markers[name]);
-                }
-              });
-            } else {
-              markers[name].setPosition(pos);
-            }
-            // Autofollow
-            if (autoFollow) {
-              map.panTo(pos);
-              if (followmeDiv) followmeDiv.classList.add("active");
-            }
+if (!markers[name]) {
+  markers[name] = new google.maps.Marker({
+    position: pos,
+    map: map,
+    title: name
+  });
+  // Alltid synlig namnruta ovanför markören!
+  const infoWindow = new google.maps.InfoWindow({
+  content: `<div style="
+    background:#222222;
+    border-radius:8px;
+    padding:4px 16px;
+    font-weight:bold;
+    font-size:15px;
+    color:#fff;
+    border:1.2px solid #444;
+    box-shadow:0 2px 8px rgba(20,20,20,0.11);
+    text-align:center;">
+    ${name}
+  </div>`,
+  pixelOffset: new google.maps.Size(0, -40)
+});
+  infoWindow.open(map, markers[name]);
+  markers[name].infoWindow = infoWindow;
+  markers[name].addListener('click', function() {
+    marker = markers[name]; // Markera start för rutt
+    if (infoWindow.getMap()) {
+      infoWindow.close();
+    } else {
+      infoWindow.open(map, markers[name]);
+    }
+  });
+} else {
+  markers[name].setPosition(pos);
+}
+// Autofollow
+if (autoFollow) {
+  map.panTo(pos);
+  if (followmeDiv) followmeDiv.classList.add("active");
+}
+
           }
         }
         if (!anyActive && followmeDiv) followmeDiv.classList.remove("active");
