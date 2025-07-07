@@ -270,15 +270,15 @@
   });
 
   // === HÄMTA BATTERI-VÄRDE FRÅN DATA ===
-  const battery = (typeof data[name].battery === "number")
-  ? `<div style="color:#ffe066; font-size:12px; font-weight:bold; margin-top:2px;">🔋 ${data[name].battery}%</div>`
+const battery = (typeof data[name].battery === "number")
+  ? `<div style="color:#ffe066;font-size:12px;font-weight:bold;margin-top:2px;">🔋 ${data[name].battery}%</div>`
   : "";
 
 // Alltid synlig namnruta ovanför markören – med batteri!
 const infoWindow = new google.maps.InfoWindow({
   content: `<div style="
     background:#222222;
-    border-radius:6px;
+    border-radius:8px;
     padding:6px 18px;
     font-weight:bold;
     font-size:15px;
@@ -293,16 +293,16 @@ const infoWindow = new google.maps.InfoWindow({
   pixelOffset: new google.maps.Size(0, -5)
 });
 
-  infoWindow.open(map, markers[name]);
-  markers[name].infoWindow = infoWindow;
-  markers[name].addListener('click', function() {
-    marker = markers[name];
-    if (infoWindow.getMap()) {
-      infoWindow.close();
-    } else {
-      infoWindow.open(map, markers[name]);
-    }
-  });
+infoWindow.open(map, markers[name]);
+markers[name].infoWindow = infoWindow;
+markers[name].addListener('click', function() {
+  marker = markers[name];
+  if (infoWindow.getMap()) {
+    infoWindow.close();
+  } else {
+    infoWindow.open(map, markers[name]);
+  }
+});
 } else {
   markers[name].setPosition(pos);
 }
@@ -310,7 +310,6 @@ if (autoFollow) {
   map.panTo(pos);
   if (followmeDiv) followmeDiv.classList.add("active");
 }
-
 
           }
         }
