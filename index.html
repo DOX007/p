@@ -271,23 +271,25 @@
 
   // === HÄMTA BATTERI-VÄRDE FRÅN DATA ===
   const battery = (typeof data[name].battery === "number")
-  ? `<div style="color:#ffe066;font-size:12px;font-weight:bold;margin-top:2px;">🔋 ${data[name].battery}%</div>`
+  ? `<div style="color:#ffe066; font-size:12px; font-weight:bold; margin-top:2px;">🔋 ${data[name].battery}%</div>`
   : "";
 
-  // Alltid synlig namnruta ovanför markören – med batteri!
+// Alltid synlig namnruta ovanför markören – med batteri!
+const infoWindow = new google.maps.InfoWindow({
   content: `<div style="
-  background:#222222;
-  border-radius:4px;
-  padding:3px 16px;
-  font-weight:bold;
-  font-size:15px;
-  color:#fff;
-  border:1.2px solid #222222;
-  box-shadow:0 2px 8px rgba(20,20,20,0.28);
-  text-align:center;">
-  ${name}
-  ${battery}
-</div>`,
+    background:#222222;
+    border-radius:6px;
+    padding:6px 18px;
+    font-weight:bold;
+    font-size:15px;
+    color:#fff;
+    border:1.5px solid #222222;
+    box-shadow:none;
+    text-align:center;
+    letter-spacing:0.5px;">
+    ${name}
+    ${battery}
+  </div>`,
   pixelOffset: new google.maps.Size(0, -5)
 });
 
