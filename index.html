@@ -271,8 +271,8 @@
 
   // === HÄMTA BATTERI-VÄRDE FRÅN DATA ===
   const battery = (typeof data[name].battery === "number")
-    ? `<div style="color:#222222;font-size:12px;font-weight:normal;margin-top:2px;">🔋 ${data[name].battery}%</div>`
-    : "";
+  ? `<div style="color:#ffe066;font-size:12px;font-weight:normal;margin-top:2px;">🔋 ${data[name].battery}%</div>`
+  : "";
 
   // Alltid synlig namnruta ovanför markören – med batteri!
   const infoWindow = new google.maps.InfoWindow({
