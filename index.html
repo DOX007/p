@@ -19,103 +19,123 @@
   .gm-ui-hover-effect span {
       display: none !important;
   }
-  </style>
-  <style>
-    html, body, #map {
-      height: 100%;
-      width: 100%;
-      margin: 0;
-      padding: 0;
-      border: none;
-      overflow: hidden;
-      touch-action: manipulation;
-      -webkit-user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .gm-fullscreen-control {
-      transform: scale(0.8);
-      transform-origin: bottom right;
-    }
-    #custom-controls {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 99;
-      display: flex;
-      gap: 8px;
-    }
-    #custom-controls button {
-      padding: 7px 17px;
-      border-radius: 5.6px;
-      border: none;
-      background: rgba(40,40,40,0.5);
-      color: #fff;
-      font-weight: 600;
-      font-size: 12.8px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(20,20,20,0.08);
-      outline: none;
-      transition: background 0.15s, color 0.15s, box-shadow 0.2s;
-      backdrop-filter: blur(1px);
-      letter-spacing: 0.5px;
-    }
-    #custom-controls button:hover {
-      background: rgba(70,70,80,0.7);
-      color: #fff;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.18);
-    }
-    .darkmode-btn {
-      margin: 10px;
-      background: #222;
-      border-radius: 50%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      width: 35.2px;
-      height: 35.2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      opacity: 0.5;
-      touch-action: manipulation;
-    }
-    .darkmode-btn svg {
-      width: 22.4px;
-      height: 22.4px;
-      display: block;
-    }
-    .followme-ctrl {
-      background: #fff;
-      border-radius: 50%;
-      box-shadow: 0 1.5px 5px rgba(30,30,30,0.15);
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border: none;
-      padding: 0;
-      margin: 8px 0 8px 0;
-      outline: none;
-      transition: background 0.18s, box-shadow 0.18s;
-    }
-    .followme-ctrl svg {
-      width: 25px;
-      height: 25px;
-      display: block;
-      fill: #1569ef;
-      transition: fill 0.2s;
-    }
-    .followme-ctrl.active {
-      background: #45b468;
-    }
-    .followme-ctrl.active svg {
-      fill: #fff;
-    }
-    .followme-ctrl:active {
-      box-shadow: 0 3px 15px rgba(30,140,40,0.18);
-    }
-  </style>
+
+  /* Ta bort vit ram/bakgrund runt InfoWindow */
+  .gm-style .gm-style-iw-c {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  /* Dölj den vita "svansen" under bubblan */
+  .gm-style .gm-style-iw-tc {
+    display: none !important;
+  }
+
+  /* Säkerställ att inget extra vitt utrymme läggs till */
+  .gm-style .gm-style-iw-d {
+    overflow: visible !important;
+  }
+</style>
+
+<style>
+  html, body, #map {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    overflow: hidden;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gm-fullscreen-control {
+    transform: scale(0.8);
+    transform-origin: bottom right;
+  }
+  #custom-controls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 99;
+    display: flex;
+    gap: 8px;
+  }
+  #custom-controls button {
+    padding: 7px 17px;
+    border-radius: 5.6px;
+    border: none;
+    background: rgba(40,40,40,0.5);
+    color: #fff;
+    font-weight: 600;
+    font-size: 12.8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(20,20,20,0.08);
+    outline: none;
+    transition: background 0.15s, color 0.15s, box-shadow 0.2s;
+    backdrop-filter: blur(1px);
+    letter-spacing: 0.5px;
+  }
+  #custom-controls button:hover {
+    background: rgba(70,70,80,0.7);
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+  }
+  .darkmode-btn {
+    margin: 10px;
+    background: #222;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    width: 35.2px;
+    height: 35.2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.5;
+    touch-action: manipulation;
+  }
+  .darkmode-btn svg {
+    width: 22.4px;
+    height: 22.4px;
+    display: block;
+  }
+  .followme-ctrl {
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1.5px 5px rgba(30,30,30,0.15);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    margin: 8px 0 8px 0;
+    outline: none;
+    transition: background 0.18s, box-shadow 0.18s;
+  }
+  .followme-ctrl svg {
+    width: 25px;
+    height: 25px;
+    display: block;
+    fill: #1569ef;
+    transition: fill 0.2s;
+  }
+  .followme-ctrl.active {
+    background: #45b468;
+  }
+  .followme-ctrl.active svg {
+    fill: #fff;
+  }
+  .followme-ctrl:active {
+    box-shadow: 0 3px 15px rgba(30,140,40,0.18);
+  }
+</style>
+
 </head>
 <body>
   <div id="custom-controls">
@@ -211,6 +231,14 @@
       map.panTo(newLatLng);
     }
 
+function formatTimeFromTimestamp(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
     function initMap() {
       map = new google.maps.Map(document.getElementById('map'), {
         zoom: 15,
@@ -229,92 +257,110 @@
 
       // === Multi-device: Live positions ===
       const ref = firebase.database().ref("live_locations");
-      const TIMEOUT = 30000; // 30 sekunder
+      const TIMEOUT = 3 * 60 * 60 * 1000;  // 30 sekunder
 
       ref.on("value", (snapshot) => {
-        const data = snapshot.val();
-        const now = Date.now();
+  const data = snapshot.val();
+  const now = Date.now();
 
-        // Ta bort gamla eller inaktiva markörer
-        for (const name in markers) {
-          if (
-            !data ||
-            !(name in data) ||
-            !data[name].timestamp ||
-            now - data[name].timestamp > TIMEOUT
-          ) {
-            markers[name].setMap(null);
-            delete markers[name];
-            if (marker && marker.title === name) marker = null;
-          }
-        }
-
-        // Lägg till/uppdatera markörer för varje aktiv enhet
-        let anyActive = false;
-        for (const name in data) {
-          if (
-            data[name] &&
-            typeof data[name].lat === "number" &&
-            typeof data[name].lon === "number" &&
-            data[name].timestamp &&
-            now - data[name].timestamp <= TIMEOUT
-          ) {
-            anyActive = true;
-            const pos = { lat: data[name].lat, lng: data[name].lon };
-
-  if (!markers[name]) {
-  markers[name] = new google.maps.Marker({
-    position: pos,
-    map: map,
-    title: name
-  });
-
-  // === HÄMTA BATTERI-VÄRDE FRÅN DATA ===
-const battery = (typeof data[name].battery === "number")
-  ? `<div style="color:#ffe066;font-size:12px;font-weight:bold;margin-top:2px;">🔋 ${data[name].battery}%</div>`
-  : "";
-
-// Alltid synlig namnruta ovanför markören – med batteri!
-const infoWindow = new google.maps.InfoWindow({
-  content: `<div style="
-    background:#222222;
-    border-radius:8px;
-    padding:6px 18px;
-    font-weight:bold;
-    font-size:15px;
-    color:#fff;
-    border:1.5px solid #222222;
-    box-shadow:none;
-    text-align:center;
-    letter-spacing:0.5px;">
-    ${name}
-    ${battery}
-  </div>`,
-  pixelOffset: new google.maps.Size(0, -5)
-});
-
-infoWindow.open(map, markers[name]);
-markers[name].infoWindow = infoWindow;
-markers[name].addListener('click', function() {
-  marker = markers[name];
-  if (infoWindow.getMap()) {
-    infoWindow.close();
-  } else {
-    infoWindow.open(map, markers[name]);
+  // Ta bort gamla eller inaktiva markörer
+  for (const name in markers) {
+    if (
+      !data ||
+      !(name in data) ||
+      !data[name].timestamp ||
+      now - data[name].timestamp > TIMEOUT
+    ) {
+      markers[name].setMap(null);
+      delete markers[name];
+      if (marker && marker.title === name) marker = null;
+    }
   }
-});
-} else {
-  markers[name].setPosition(pos);
-}
-if (autoFollow) {
-  map.panTo(pos);
-  if (followmeDiv) followmeDiv.classList.add("active");
-}
 
+  // Lägg till/uppdatera markörer för varje aktiv enhet
+  let anyActive = false;
+  for (const name in data) {
+    const item = data[name];
+    if (
+      item &&
+      typeof item.lat === "number" &&
+      typeof item.lon === "number" &&
+      item.timestamp &&
+      now - item.timestamp <= TIMEOUT
+    ) {
+      anyActive = true;
+      const pos = { lat: item.lat, lng: item.lon };
+
+      // === STATUS-RAD: Batteri + tid ===
+      const timeStr = formatTimeFromTimestamp(item.timestamp);
+      let statusHtml = "";
+      if (typeof item.battery === "number") {
+        statusHtml = `<div style="color:#ffe066;font-size:12px;font-weight:bold;margin-top:2px;">🔋 ${item.battery}% / ${timeStr}</div>`;
+      } else if (timeStr) {
+        statusHtml = `<div style="color:#ffe066;font-size:12px;font-weight:bold;margin-top:2px;">${timeStr}</div>`;
+      }
+
+      // === Namnruta + status i InfoWindow ===
+      const contentHtml = `<div style="
+        background:#222222;
+        border-radius:8px;
+        padding:6px 18px;
+        margin:0;
+        font-weight:bold;
+        font-size:15px;
+        color:#fff;
+        border:1.5px solid #222222;
+        box-shadow:none;
+        text-align:center;
+        letter-spacing:0.5px;">
+        ${name}
+        ${statusHtml}
+      </div>`;
+
+      if (!markers[name]) {
+        const m = new google.maps.Marker({
+          position: pos,
+          map: map,
+          title: name
+        });
+
+        const infoWindow = new google.maps.InfoWindow({
+          content: contentHtml,
+          pixelOffset: new google.maps.Size(0, -5)
+        });
+
+        infoWindow.open(map, m);
+        m.infoWindow = infoWindow;
+
+        m.addListener('click', function() {
+          marker = m;
+          if (infoWindow.getMap()) {
+            infoWindow.close();
+          } else {
+            infoWindow.open(map, m);
           }
+        });
+
+        markers[name] = m;
+      } else {
+        // Uppdatera position och InfoWindow‑innehåll
+        markers[name].setPosition(pos);
+        if (markers[name].infoWindow) {
+          markers[name].infoWindow.setContent(contentHtml);
         }
-        if (!anyActive && followmeDiv) followmeDiv.classList.remove("active");
-      });
+      }
+
+      // Auto‑follow (som i din tidigare version)
+      if (autoFollow) {
+        map.panTo(pos);
+        if (followmeDiv) followmeDiv.classList.add("active");
+      }
+    }
+  }
+
+  if (!anyActive && followmeDiv) followmeDiv.classList.remove("active");
+});
+
 
       addCustomDarkModeControl(map);
       addFollowMeControl(map);
